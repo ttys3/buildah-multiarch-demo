@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-IMAGE_NAME=buildah-digest-demo
-IMAGE_TAG=latest
+IMAGE_NAME=buildah-multiarch-demo
+IMAGE_TAG=amd64
 
 #enable xtrace
 set -x
@@ -12,7 +12,7 @@ set -e
 
 
 # Create a container
-container=$(buildah from docker.io/library/alpine:3.10)
+container=$(buildah from docker.io/80x86/base-alpine:3.11-amd64)
 
 # Labels
 buildah config --label maintainer="荒野無燈 <i@ttys3.net>" $container
@@ -22,11 +22,8 @@ TZ="Asia/Shanghai"
 # Env
 buildah config --env TZ=${TZ} $container
 
-buildah run --network host $container sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-buildah run --network host $container apk add --no-cache --update tzdata
-buildah run --network host $container rm -rf /var/cache/apk/*
-buildah run --network host $container rm -rf /tmp/*
-buildah run --network host $container ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
+# demo: do the work
+buildah run --network host $container sh -c 'date > /etc/amd64-build'
 
 #test timezone
 buildah run --network host $container sh -c 'echo "container date: " && date'
